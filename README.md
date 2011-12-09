@@ -105,3 +105,13 @@ creating a new application, run the connect command:
 
 It will create your working directory with the (existing) dotcloud application `myapp`.
 
+## Contributing
+
+If you've found a bug or have a feature request for the new CLI, the
+best way to send feedbacks is to open it in the github issues list.
+
+If you really want to contribute your code by submitting patches (that
+is awesome!), fork a project on github, and send us a pull
+request. Note that by forking and sending pull requests, you agree to
+assign the copyright to DotCloud Inc.
+
