@@ -1,5 +1,7 @@
 import urllib2
 import json
+import sys
+import os
 
 from .auth import BasicAuth, OAuth2Auth
 from .response import *
@@ -55,8 +57,16 @@ class RESTClient(object):
         req.add_header('Accept', 'application/json')
         if self.trace_id:
             req.add_header('X-DotCloud-TraceID', self.trace_id)
+        if os.environ.get('DEBUG'):
+            print >>sys.stderr, '### {method} {url} data=|{data}|'.format(
+                method  = req.get_method(),
+                url     = req.get_full_url(),
+                data    = req.get_data()
+            )
         try:
             res = urllib2.urlopen(req)
+            if res and os.environ.get('DEBUG'):
+                print >>sys.stderr, '### {code}'.format(code=res.code)
             self.trace_id = res.headers.get('X-DotCloud-TraceID')
             return self.make_response(res)
         except urllib2.HTTPError, e:
