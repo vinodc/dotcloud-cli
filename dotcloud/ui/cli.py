@@ -297,18 +297,24 @@ class CLI(object):
                 else :
                     print '  ' + data['name']
         elif subcmd == 'create':
+            if not len(args.commands):
+                self.die('No environment name specified')
             name = args.commands.pop(0)
             url = '/me/applications/{0}/environments'.format(args.application)
             res = self.client.post(url, { 'name': name })
             self.info('Environment "{0}" created and set to the current environment.'.format(name))
             self.patch_config({ 'environment': name })
         elif subcmd == 'destroy':
+            if not len(args.commands):
+                self.die('No environment name specified')
             name = args.commands.pop(0)
             url = '/me/applications/{0}/environments/{1}'.format(args.application, args.environment)
             res = self.client.delete(url)
             self.info('Environment "{0}" destroyed. Current environment is set to default.'.format(name))
             self.patch_config({ 'environment': 'default' })
         elif subcmd == 'use' or subcmd == 'switch':
+            if not len(args.commands):
+                self.die('No environment name specified')
             name = args.commands.pop(0)
             self.info('Current environment switched to {0}'.format(name))
             self.patch_config({ 'environment': name })
