@@ -15,11 +15,14 @@ import getpass
 import urllib2
 import urllib
 import base64
+import os
 
 class CLI(object):
     __version__ = VERSION
     def __init__(self, debug=False, endpoint=None):
-        self.client = RESTClient(endpoint=endpoint)
+        if os.environ.get('DOTCLOUD_DEBUG'):
+            debug = True
+        self.client = RESTClient(endpoint=endpoint, debug=debug)
         self.debug = debug
         self.error_handlers = {
             401: self.error_authen,
