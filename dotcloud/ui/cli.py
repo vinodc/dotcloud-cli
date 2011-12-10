@@ -67,6 +67,8 @@ class CLI(object):
                 handler(e)
             except KeyboardInterrupt:
                 pass
+            except urllib2.URLError as e:
+                print 'Accessing DotCloud API failed: {0}'.format(str(e))
             finally:
                 if args.trace and self.client.trace_id:
                     print '---> TraceID: ' + self.client.trace_id
