@@ -419,7 +419,7 @@ class CLI(object):
         res = self.client.get(url)
         push_url = res.item.get('url')
         self.rsync_code(push_url)
-        self.deploy(args.application, args.environment, create=True)
+        self.deploy(args.application, args.environment, create=True, clean=args.clean)
 
     def rsync_code(self, push_url, local_dir='.'):
         self.info('Syncing code from {0} to {1}'.format(local_dir, push_url))
@@ -445,11 +445,11 @@ class CLI(object):
         except OSError:
             self.die('rsync failed')
 
-    def deploy(self, application, environment, create=False):
+    def deploy(self, application, environment, create=False, clean=False):
         self.info('Deploying {1} environment for {0}'.format(application, environment))
         url = '/me/applications/{0}/environments/{1}/revision'.format(application, environment)
         try:
-            self.client.put(url, {'revision': None})
+            self.client.put(url, {'revision': None, 'clean': clean})
         except RESTAPIError:
             if create:
                 # FIXME this should no

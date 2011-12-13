@@ -46,6 +46,7 @@ def get_parser(name='dotcloud'):
     env.add_argument('commands', nargs='*')
 
     push = subcmd.add_parser('push', help='Push the code')
+    push.add_argument('--clean', action='store_true', help='clean build')
 
     var = subcmd.add_parser('var', help='Manipulate application variables')
     var.add_argument('commands', nargs='*')
