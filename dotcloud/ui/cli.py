@@ -5,7 +5,8 @@ from ..client import RESTClient
 from ..client.errors import RESTAPIError, AuthenticationNotConfigured
 from ..client.auth import BasicAuth, NullAuth, OAuth2Auth
 
-import sys, os
+import sys
+import os
 import json
 import subprocess
 import re
@@ -15,13 +16,10 @@ import getpass
 import urllib2
 import urllib
 import base64
-import os
 
 class CLI(object):
     __version__ = VERSION
     def __init__(self, debug=False, endpoint=None):
-        if os.environ.get('DOTCLOUD_DEBUG'):
-            debug = True
         self.client = RESTClient(endpoint=endpoint, debug=debug)
         self.debug = debug
         self.error_handlers = {
