@@ -1,8 +1,8 @@
 import argparse
 from .version import VERSION
 
-def _init_parser():
-    parser = argparse.ArgumentParser(prog='dotcloud', description='dotcloud CLI')
+def get_parser(name='dotcloud'):
+    parser = argparse.ArgumentParser(prog=name, description='dotcloud CLI')
     parser.add_argument('--application', '-A', help='specify the application')
     parser.add_argument('--environment', '-E', help='specify the environment')
     parser.add_argument('--version', '-v', action='version', version='dotcloud/{0}'.format(VERSION))
@@ -57,11 +57,6 @@ def _init_parser():
     restart.add_argument('service', help='Specify the service')
 
     return parser
-
-_p = _init_parser()
-
-def get_parser():
-    return _p
     
 
 

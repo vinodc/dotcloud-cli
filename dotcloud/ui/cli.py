@@ -30,6 +30,7 @@ class CLI(object):
         }
         self.global_config = GlobalConfig()
         self.setup_auth()
+        self.cmd = os.path.basename(sys.argv[0])
 
     def setup_auth(self):
         if self.global_config.get('token'):
@@ -54,7 +55,7 @@ class CLI(object):
         return True
 
     def run(self, args):
-        p = get_parser()
+        p = get_parser(self.cmd)
         args = p.parse_args(args)
         self.load_config(args)
         cmd = 'cmd_{0}'.format(args.cmd)
@@ -62,7 +63,7 @@ class CLI(object):
             try:
                 getattr(self, cmd)(args)
             except AuthenticationNotConfigured:
-                print 'CLI authentication is not configured. Run `dotcloud setup` now.'
+                print 'CLI authentication is not configured. Run `{0} setup` now.'.format(self.cmd)
             except RESTAPIError, e:
                 handler = self.error_handlers.get(e.code, self.default_error_handler)
                 handler(e)
@@ -78,7 +79,7 @@ class CLI(object):
         def wrapped(self, args):
             if args.application is None:
                 self.die('DotCloud application is not connected. '
-                         'Run `dotcloud create <appname>` or `dotcloud connect <appname>`')
+                         'Run `{cmd} create <appname>` or `{cmd} connect <appname>`'.format(cmd=self.cmd))
             if args.environment is None:
                 args.environment = 'default'
             func(self, args)
@@ -165,7 +166,7 @@ class CLI(object):
             res = self.client.get('/me')
             print 'OK: Client is authenticated as {0}'.format(res.item['username'])
         except:
-            self.die('Authentication failed. Run `dotcloud setup` to redo the authentication')
+            self.die('Authentication failed. Run `{cmd} setup` to redo the authentication'.format(cmd=self.cmd))
         self.get_keys()
 
     def cmd_setup(self, args):
@@ -190,7 +191,7 @@ class CLI(object):
         self.global_config = GlobalConfig()  # reload
         self.setup_auth()
         self.get_keys()
-        self.info('DotCloud authentication is complete! You are recommended to run `dotcloud check` now.')
+        self.info('DotCloud authentication is complete! You are recommended to run `{cmd} check` now.'.format(cmd=self.cmd))
 
     def register_client(self, url, username, password):
         req = urllib2.Request(url)
@@ -247,7 +248,8 @@ class CLI(object):
             res = self.client.get(url)
             self._connect(args.application)
         except RESTAPIError:
-            self.die('Application "{0}" doesn\'t exist. Try `dotcloud create <appname>`.'.format(args.application))
+            self.die('Application "{app}" doesn\'t exist. Try `{cmd} create <appname>`.' \
+                         .format(app=args.application, cmd=self.cmd))
 
     @app_local
     def cmd_disconnect(self, args):
@@ -346,7 +348,7 @@ class CLI(object):
                 try:
                     key, val = pair.split('=')
                 except ValueError:
-                    self.die('Usage: dotcloud var set KEY=VALUE ...')
+                    self.die('Usage: {0} var set KEY=VALUE ...'.format(self.cmd))
                 patch[key] = val
             self.client.patch(url, patch)
             deploy = True
@@ -369,7 +371,7 @@ class CLI(object):
                 name, value = svc.split('=', 2)
                 value = int(value)
             except (ValueError, TypeError):
-                self.die('Usage: dotcloud scale service=number')
+                self.die('Usage: {0} scale service=number'.format(self.cmd))
             instances[name] = value
         for name, value in instances.items():
             url = '/me/applications/{0}/environments/{1}/services/{2}/instances' \
