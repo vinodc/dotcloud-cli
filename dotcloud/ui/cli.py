@@ -426,12 +426,17 @@ class CLI(object):
         url = self.parse_url(push_url)
         ssh = ' '.join(self.common_ssh_options)
         ssh += ' -p {0}'.format(url['port'])
+        excludes = ('*.pyc', '.git', '.hg')
         if not local_dir.endswith('/'):
             local_dir += '/'
-        rsync = ('rsync', '-lpthrvz', '--delete', '--safe-links',
-                 '-e', ssh, local_dir,
-                 '{user}@{host}:{dest}/'.format(user=url['user'],
-                                                host=url['host'], dest=url['path']))
+        ignore_file = os.path.join(local_dir, '.dotcloudignore')
+        ignore_opt = ('--exclude-from', ignore_file) if os.path.exists(ignore_file) else tuple()
+        rsync = ('rsync', '-lpthrvz', '--delete', '--safe-links') + \
+                 tuple('--exclude={0}'.format(e) for e in excludes) + \
+                 ignore_opt + \
+                 ('-e', ssh, local_dir,
+                  '{user}@{host}:{dest}/'.format(user=url['user'],
+                                                 host=url['host'], dest=url['path']))
         try:
             ret = subprocess.call(rsync, close_fds=True)
             if ret!= 0:
