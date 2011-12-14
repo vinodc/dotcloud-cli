@@ -73,7 +73,7 @@ class CLI(object):
                 print 'Accessing DotCloud API failed: {0}'.format(str(e))
             finally:
                 if args.trace and self.client.trace_id:
-                    print '---> TraceID: ' + self.client.trace_id
+                    print '--> TraceID: ' + self.client.trace_id
 
     def app_local(func):
         def wrapped(self, args):
@@ -153,7 +153,7 @@ class CLI(object):
 
     def error_server(self, e):
         if self.client.trace_id:
-            print '---> TraceID: {0}'.format(self.client.trace_id)
+            print '--> TraceID: {0}'.format(self.client.trace_id)
         self.die('Server Error: {0}'.format(e.desc))
 
     def cmd_version(self, args):
