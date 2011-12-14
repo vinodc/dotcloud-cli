@@ -404,14 +404,18 @@ class CLI(object):
 
     @app_local
     def cmd_url(self, args):
-        type = 'http'
-        url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
+        def cb(service, urls):
+            print '{0}: {1}'.format(service['name'], urls[0]['url'])
+        self.get_url(args.application, args.environment, cb)
+
+    def get_url(self, application, environment, cb, type='http'):
+        url = '/me/applications/{0}/environments/{1}/services'.format(application, environment)
         res = self.client.get(url)
         for service in res.items:
             instance = service['instances'][0]
             u = [p for p in instance.get('ports', []) if p['name'] == type]
             if len(u) > 0:
-                print '{0}: {1}'.format(service['name'], u[0]['url'])
+                cb(service, u)
 
     @app_local
     def cmd_push(self, args):
@@ -477,6 +481,9 @@ class CLI(object):
                 break
             url = next.get('href')
             time.sleep(3)
+        def display_url(service, urls):
+            self.info('Application is live at {0}'.format(urls[0]['url']))
+        self.get_url(application, environment, display_url)
 
     @app_local
     def cmd_ssh(self, args):
