@@ -54,10 +54,15 @@ class CLI(object):
         self.global_config.save()
         return True
 
+    def show_trace(self, id):
+        print '--> TraceID: ' + id
+
     def run(self, args):
         p = get_parser(self.cmd)
         args = p.parse_args(args)
         self.load_config(args)
+        if args.trace:
+            self.client.trace = lambda(id): self.show_trace(id)
         cmd = 'cmd_{0}'.format(args.cmd)
         if hasattr(self, cmd):
             try:
@@ -73,7 +78,7 @@ class CLI(object):
                 print 'Accessing DotCloud API failed: {0}'.format(str(e))
             finally:
                 if args.trace and self.client.trace_id:
-                    print '--> TraceID: ' + self.client.trace_id
+                    self.show_trace(self.client.trace_id)
 
     def app_local(func):
         def wrapped(self, args):
