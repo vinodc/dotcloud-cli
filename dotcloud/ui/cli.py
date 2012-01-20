@@ -360,16 +360,15 @@ class CLI(object):
 
     @app_local
     def cmd_var(self, args):
-        subcmd = args.commands.pop(0) if len(args.commands) > 0 else 'list'
         url = '/me/applications/{0}/environments/{1}/variables'.format(args.application, args.environment)
         deploy = None
-        if subcmd == 'list':
+        if args.subcmd == 'list':
             var = self.client.get(url).item
             for name in sorted(var.keys()):
                 print '='.join((name, var.get(name)))
-        elif subcmd == 'set':
+        elif args.subcmd == 'set':
             patch = {}
-            for pair in args.commands:
+            for pair in args.values:
                 try:
                     key, val = pair.split('=')
                 except ValueError:
@@ -377,9 +376,9 @@ class CLI(object):
                 patch[key] = val
             self.client.patch(url, patch)
             deploy = True
-        elif subcmd == 'unset':
+        elif args.subcmd == 'unset':
             patch = {}
-            for name in args.commands:
+            for name in args.variables:
                 patch[name] = None
             self.client.patch(url, patch)
             deploy = True

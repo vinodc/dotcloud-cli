@@ -56,8 +56,13 @@ def get_parser(name='dotcloud'):
     push = subcmd.add_parser('push', help='Push the code')
     push.add_argument('--clean', action='store_true', help='clean build')
 
-    var = subcmd.add_parser('var', help='Manipulate application variables')
-    var.add_argument('commands', nargs='*')
+    var = subcmd.add_parser('var', help='Manipulate application variables') \
+        .add_subparsers(dest='subcmd')
+    var_list = var.add_parser('list', help='List the application variables')
+    var_set = var.add_parser('set', help='Set new application variables')
+    var_set.add_argument('values', help='key=value pair of application variables to set', nargs='*')
+    var_unset = var.add_parser('unset', help='Unset application variables')
+    var_unset.add_argument('variables', help='Application ariables to unset')
 
     scale = subcmd.add_parser('scale', help='Scale services')
     scale.add_argument('services', nargs='*')
