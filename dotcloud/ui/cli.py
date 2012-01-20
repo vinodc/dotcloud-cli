@@ -403,6 +403,11 @@ class CLI(object):
         for service in res.items:
             print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
             self.dump_service(service['instances'][0], indent=2)
+        url = '/me/applications/{0}'.format(args.application)
+        res = self.client.get(url)
+        snapshots = res.item.get('snapshots_enabled', False)
+        print '--------'
+        print 'Build snapshots: ' + ('enabled' if snapshots else 'disabled')
 
     def dump_service(self, instance, indent=0):
         def show(string):
