@@ -302,10 +302,9 @@ class CLI(object):
 
     @app_local
     def cmd_env(self, args):
-        subcmd = args.commands.pop(0) if len(args.commands) > 0 else 'show'
-        if subcmd == 'show':
+        if args.subcmd == 'show':
             print args.environment
-        elif subcmd == 'list':
+        elif args.subcmd == 'list':
             url = '/me/applications/{0}/environments'.format(args.application)
             res = self.client.get(url)
             for data in res.items:
@@ -313,30 +312,21 @@ class CLI(object):
                     print '* ' + data['name']
                 else :
                     print '  ' + data['name']
-        elif subcmd == 'create':
-            if not len(args.commands):
-                self.die('No environment name specified')
-            name = args.commands.pop(0)
+        elif args.subcmd == 'create':
             url = '/me/applications/{0}/environments'.format(args.application)
-            res = self.client.post(url, { 'name': name })
-            self.info('Environment "{0}" created and set to the current environment.'.format(name))
-            self.patch_config({ 'environment': name })
-        elif subcmd == 'destroy':
-            if not len(args.commands):
-                self.die('No environment name specified')
-            name = args.commands.pop(0)
+            res = self.client.post(url, { 'name': args.name })
+            self.info('Environment "{0}" created and set to the current environment.'.format(args.name))
+            self.patch_config({ 'environment': args.name })
+        elif args.subcmd == 'destroy':
             url = '/me/applications/{0}/environments/{1}'.format(args.application, args.environment)
             res = self.client.delete(url)
-            self.info('Environment "{0}" destroyed. Current environment is set to default.'.format(name))
+            self.info('Environment "{0}" destroyed. Current environment is set to default.'.format(args.name))
             self.patch_config({ 'environment': 'default' })
-        elif subcmd == 'use' or subcmd == 'switch':
-            if not len(args.commands):
-                self.die('No environment name specified')
-            name = args.commands.pop(0)
-            self.info('Current environment switched to {0}'.format(name))
-            self.patch_config({ 'environment': name })
+        elif args.subcmd == 'use' or args.subcmd == 'switch':
+            self.info('Current environment switched to {0}'.format(args.name))
+            self.patch_config({ 'environment': args.name })
         else:
-            self.die('Unknown sub command {0}'.format(subcmd))
+            self.die('Unknown sub command {0}'.format(args.subcmd))
 
     @app_local
     def cmd_alias(self, args):
