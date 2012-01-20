@@ -60,12 +60,14 @@ def get_parser(name='dotcloud'):
         .add_subparsers(dest='subcmd')
     var_list = var.add_parser('list', help='List the application variables')
     var_set = var.add_parser('set', help='Set new application variables')
-    var_set.add_argument('values', help='key=value pair of application variables to set', nargs='*')
+    var_set.add_argument('values', help='Application variables to set',
+                         metavar='key=value', nargs='*')
     var_unset = var.add_parser('unset', help='Unset application variables')
-    var_unset.add_argument('variables', help='Application ariables to unset')
+    var_unset.add_argument('variables', help='Application ariables to unset', metavar='var', nargs='*')
 
     scale = subcmd.add_parser('scale', help='Scale services')
-    scale.add_argument('services', nargs='*')
+    scale.add_argument('services', nargs='*', metavar='service=count',
+                       help='Number of instances to set for each service e.g. www=2')
 
     restart = subcmd.add_parser('restart', help='Restart the service')
     restart.add_argument('service', help='Specify the service')
