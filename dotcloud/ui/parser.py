@@ -72,8 +72,15 @@ def get_parser(name='dotcloud'):
     restart = subcmd.add_parser('restart', help='Restart the service')
     restart.add_argument('service', help='Specify the service')
 
-    alias = subcmd.add_parser('alias', help='Manage aliases for the service')
-    alias.add_argument('commands', nargs='*')
+    alias = subcmd.add_parser('alias', help='Manage aliases for the service') \
+        .add_subparsers(dest='subcmd')
+    alias_list = alias.add_parser('list', help='List the aliases')
+    alias_add = alias.add_parser('add', help='Add a new alias')
+    alias_add.add_argument('service', help='Service to set alias for')
+    alias_add.add_argument('alias', help='New alias (domain name)')
+    alias_rm = alias.add_parser('rm', help='Remove an alias')
+    alias_rm.add_argument('service', help='Service to remove alias from')
+    alias_rm.add_argument('alias', help='Alias (domain name) to remove')
 
     return parser
     

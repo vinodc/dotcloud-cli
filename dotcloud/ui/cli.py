@@ -330,8 +330,7 @@ class CLI(object):
 
     @app_local
     def cmd_alias(self, args):
-        subcmd = args.commands.pop(0) if len(args.commands) > 0 else 'list'
-        if subcmd == 'list':
+        if args.subcmd == 'list':
             url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
             res = self.client.get(url)
             for svc in res.items:
@@ -340,23 +339,16 @@ class CLI(object):
                 res = self.client.get(url)
                 for alias in res.items:
                     print '{0}: {1}'.format(svc.get('name'), alias.get('alias'))
-        elif subcmd == 'add' or subcmd == 'rm':
-            service = args.commands.pop(0) if len(args.commands) > 0 else None
-            alias = args.commands.pop(0) if len(args.commands) > 0 else None
-            if not service or not alias:
-                self.die('Usage: {cmd} alias [list,add,rm] service domain'.format(cmd=self.cmd))
-            if subcmd == 'add':
-                url = '/me/applications/{0}/environments/{1}/services/{2}/aliases' \
-                    .format(args.application, args.environment, service)
-                res = self.client.post(url, { 'alias': alias })
-                print 'Alias "{0}" created for "{1}"'.format(alias, service)
-            else:
-                url = '/me/applications/{0}/environments/{1}/services/{2}/aliases/{3}' \
-                    .format(args.application, args.environment, service, alias)
-                self.client.delete(url)
-                print 'Alias "{0}" deleted from "{1}"'.format(alias, service)
-        else:
-            self.die('Usage: {cmd} alias [list,add,rm] service [domain]'.format(cmd=self.cmd))
+        elif args.subcmd == 'add':
+            url = '/me/applications/{0}/environments/{1}/services/{2}/aliases' \
+                .format(args.application, args.environment, args.service)
+            res = self.client.post(url, { 'alias': args.alias })
+            print 'Alias "{0}" created for "{1}"'.format(args.alias, args.service)
+        elif args.subcmd == 'rm':
+            url = '/me/applications/{0}/environments/{1}/services/{2}/aliases/{3}' \
+                .format(args.application, args.environment, args.service, args.alias)
+            self.client.delete(url)
+            print 'Alias "{0}" deleted from "{1}"'.format(args.alias, args.service)
 
     @app_local
     def cmd_var(self, args):
