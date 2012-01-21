@@ -225,7 +225,7 @@ class CLI(object):
         try:
             key = res.items[0]['private_key']
             self.global_config.save_key(key)
-        except KeyError, IndexError:
+        except (KeyError, IndexError):
             pass
 
     def cmd_list(self, args):
