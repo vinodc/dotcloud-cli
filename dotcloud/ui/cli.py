@@ -226,7 +226,7 @@ class CLI(object):
             key = res.items[0]['private_key']
             self.global_config.save_key(key)
         except (KeyError, IndexError):
-            pass
+            self.info('Retrieving push keys failed. You might have to run `{0} check` again'.format(self.cmd))
 
     def cmd_list(self, args):
         res = self.client.get('/me/applications')
