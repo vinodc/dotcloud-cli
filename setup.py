@@ -20,7 +20,7 @@
 ## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ## THE SOFTWARE.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 VERSION = '0.9.0'
 
 setup(
@@ -30,11 +30,17 @@ setup(
     packages = [
         'dotcloud',
         'dotcloud.ui',
-        'dotcloud.client'
+        'dotcloud.client',
+        'dotcloud.packages',
+        'dotcloud.packages.ssl_match_hostname'
     ],
     scripts  = [
         'bin/dotcloud2'
     ],
     install_requires = ['argparse'],
+    include_package_data = True,
+    package_data = {
+        'dotcloud.client': ['data/ca_certs.pem']
+    },
     zip_safe = False
 )
