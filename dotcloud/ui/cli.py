@@ -2,7 +2,8 @@ from .parser import get_parser
 from .version import VERSION
 from .config import GlobalConfig
 from ..client import RESTClient
-from ..client.errors import RESTAPIError, AuthenticationNotConfigured
+from ..client.errors import (RESTAPIError, AuthenticationNotConfigured,
+                             SSLVerificationError)
 from ..client.auth import BasicAuth, NullAuth, OAuth2Auth
 
 import sys
@@ -74,6 +75,8 @@ class CLI(object):
                 handler(e)
             except KeyboardInterrupt:
                 pass
+            except SSLVerificationError as e:
+                print 'SSL Connection to Dotcloud API failed: {0}'.format(str(e))
             except urllib2.URLError as e:
                 print 'Accessing DotCloud API failed: {0}'.format(str(e))
             finally:

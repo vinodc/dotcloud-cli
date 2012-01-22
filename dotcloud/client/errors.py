@@ -8,3 +8,5 @@ class RESTAPIError(Exception):
 
 class AuthenticationNotConfigured(Exception):
     pass
+class SSLVerificationError(Exception):
+    pass

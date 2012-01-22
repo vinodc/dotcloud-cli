@@ -7,7 +7,8 @@ import os
 
 from .auth import BasicAuth, OAuth2Auth
 from .response import *
-from .errors import RESTAPIError, AuthenticationNotConfigured
+from .errors import (RESTAPIError, AuthenticationNotConfigured,
+                     SSLVerificationError)
 from ..packages.ssl_match_hostname import match_hostname
 
 try:
@@ -77,31 +78,26 @@ class RESTClient(object):
                 data    = req.get_data()
             )
 
-        ssl_verification_retry = True
-        while ssl_verification_retry:
-            ssl_verification_retry = False
-            try:
-                res = urllib2.urlopen(req)
-                if res and self.debug:
-                    print >>sys.stderr, '### {code}'.format(code=res.code)
-                self.trace_id = res.headers.get('X-DotCloud-TraceID')
-                if self.trace:
-                    self.trace(self.trace_id)
-                return self.make_response(res)
-            except urllib2.HTTPError, e:
-                if e.code == 401 and self.authenticator.retriable:
-                    if self.authenticator.prepare_retry():
-                        return self.request(req)
-                return self.make_response(e)
-            except urllib2.URLError, e:
-                import pdb; pdb.set_trace()
-                if 'ssl' in sys.modules and isinstance(e.reason, ssl.SSLError):
-                    if self.debug:
-                        print >> sys.stderr, '### %s' % e.reason.strerror
-                    urllib2.install_opener(urllib2.build_opener(urllib2.HTTPSHandler()))
-                    ssl_verification_retry = True
-                else:
-                    raise
+            
+        try:
+            res = urllib2.urlopen(req)
+            if res and self.debug:
+                print >>sys.stderr, '### {code}'.format(code=res.code)
+            self.trace_id = res.headers.get('X-DotCloud-TraceID')
+            if self.trace:
+                self.trace(self.trace_id)
+            return self.make_response(res)
+        except urllib2.HTTPError, e:
+            if e.code == 401 and self.authenticator.retriable:
+                if self.authenticator.prepare_retry():
+                    return self.request(req)
+            return self.make_response(e)
+        except urllib2.URLError, e:
+            if 'ssl' in sys.modules and isinstance(e.reason, ssl.SSLError):
+                if self.debug:
+                    print >> sys.stderr, '### %s' % e.reason.strerror
+                raise SSLVerificationError(str(e.reason))
+            raise
 
     def make_response(self, res):
         if res.headers['Content-Type'] == 'application/json':
