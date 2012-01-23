@@ -329,6 +329,14 @@ class CLI(object):
             self.die('Unknown sub command {0}'.format(args.subcmd))
 
     @app_local
+    def cmd_service(self, args):
+        if args.subcmd == 'list':
+            url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
+            res = self.client.get(url)
+            for service in res.items:
+                print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
+
+    @app_local
     def cmd_alias(self, args):
         if args.subcmd == 'list':
             url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)

@@ -82,6 +82,10 @@ def get_parser(name='dotcloud'):
     alias_rm.add_argument('service', help='Service to remove alias from')
     alias_rm.add_argument('alias', help='Alias (domain name) to remove')
 
+    service = subcmd.add_parser('service', help='Manage services') \
+        .add_subparsers(dest='subcmd')
+    service_list = service.add_parser('list', help='List the services')
+
     return parser
     
 
