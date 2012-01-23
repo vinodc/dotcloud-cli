@@ -406,8 +406,16 @@ class CLI(object):
 
     @app_local
     def cmd_info(self, args):
-        url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
-        res = self.client.get(url)
+        try:
+            url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
+            res = self.client.get(url)
+        except RESTAPIError as e:
+            if e.code == 404:
+                print 'WARNING: It seems you haven\'t deployed your application. '
+                print 'WARNING: Run {0} push to deploy and see the information about your stack. '.format(self.cmd)
+                return
+            else:
+                raise
         revision = None
         for service in res.items:
             print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
