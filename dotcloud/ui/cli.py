@@ -416,17 +416,20 @@ class CLI(object):
                 return
             else:
                 raise
-        revision = None
         for service in res.items:
             print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
             self.dump_service(service['instances'][0], indent=2)
-            if not revision:
-                revision = service['instances'][0]['revision']
+
         url = '/me/applications/{0}'.format(args.application)
         res = self.client.get(url)
         snapshots = res.item.get('snapshots_enabled', False)
+
+        url = '/me/applications/{0}/environments/{1}'.format(args.application, args.environment)
+        res = self.client.get(url)
+        revision = res.item.get('revision', None)
+
         print '--------'
-        print 'Revision: ' + revision
+        print 'Revision: ' + (revision if revision else '(Unknown)')
         print 'Build snapshots: ' + ('enabled' if snapshots else 'disabled')
 
     def dump_service(self, instance, indent=0):
