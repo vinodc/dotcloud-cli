@@ -458,6 +458,10 @@ class CLI(object):
                 cb(service, u)
 
     @app_local
+    def cmd_deploy(self, args):
+        self.deploy(args.application, args.environment, clean=args.clean, revision=args.revision)
+
+    @app_local
     def cmd_push(self, args):
         url = '/me/applications/{0}/push-url'.format(args.application)
         res = self.client.get(url)
@@ -489,11 +493,11 @@ class CLI(object):
         except OSError:
             self.die('rsync failed')
 
-    def deploy(self, application, environment, create=False, clean=False):
+    def deploy(self, application, environment, create=False, clean=False, revision=None):
         self.info('Deploying {1} environment for {0}'.format(application, environment))
         url = '/me/applications/{0}/environments/{1}/revision'.format(application, environment)
         try:
-            self.client.put(url, {'revision': None, 'clean': clean})
+            self.client.put(url, {'revision': revision, 'clean': clean})
         except RESTAPIError:
             if create:
                 # FIXME this should no

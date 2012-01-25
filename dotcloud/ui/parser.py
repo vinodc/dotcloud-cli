@@ -56,6 +56,10 @@ def get_parser(name='dotcloud'):
     push = subcmd.add_parser('push', help='Push the code')
     push.add_argument('--clean', action='store_true', help='clean build')
 
+    deploy = subcmd.add_parser('deploy', help='Deploy the code')
+    deploy.add_argument('revision', help='Revision to deploy', default='latest', nargs='?')
+    deploy.add_argument('--clean', action='store_true', help='clean build')
+
     var = subcmd.add_parser('var', help='Manipulate application variables') \
         .add_subparsers(dest='subcmd')
     var_list = var.add_parser('list', help='List the application variables')
