@@ -332,6 +332,14 @@ class CLI(object):
             self.die('Unknown sub command {0}'.format(args.subcmd))
 
     @app_local
+    def cmd_service(self, args):
+        if args.subcmd == 'list':
+            url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
+            res = self.client.get(url)
+            for service in res.items:
+                print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
+
+    @app_local
     def cmd_alias(self, args):
         if args.subcmd == 'list':
             url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
@@ -401,15 +409,27 @@ class CLI(object):
 
     @app_local
     def cmd_info(self, args):
-        url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
-        res = self.client.get(url)
+        try:
+            url = '/me/applications/{0}/environments/{1}/services'.format(args.application, args.environment)
+            res = self.client.get(url)
+        except RESTAPIError as e:
+            if e.code == 404:
+                print 'WARNING: It seems you haven\'t deployed your application. '
+                print 'WARNING: Run {0} push to deploy and see the information about your stack. '.format(self.cmd)
+                return
+            else:
+                raise
+        revision = None
         for service in res.items:
             print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
             self.dump_service(service['instances'][0], indent=2)
+            if not revision:
+                revision = service['instances'][0]['revision']
         url = '/me/applications/{0}'.format(args.application)
         res = self.client.get(url)
         snapshots = res.item.get('snapshots_enabled', False)
         print '--------'
+        print 'Revision: ' + revision
         print 'Build snapshots: ' + ('enabled' if snapshots else 'disabled')
 
     def dump_service(self, instance, indent=0):
@@ -440,6 +460,10 @@ class CLI(object):
             u = [p for p in instance.get('ports', []) if p['name'] == type]
             if len(u) > 0:
                 cb(service, u)
+
+    @app_local
+    def cmd_deploy(self, args):
+        self.deploy(args.application, args.environment, clean=args.clean, revision=args.revision)
 
     @app_local
     def cmd_push(self, args):
@@ -473,11 +497,11 @@ class CLI(object):
         except OSError:
             self.die('rsync failed')
 
-    def deploy(self, application, environment, create=False, clean=False):
+    def deploy(self, application, environment, create=False, clean=False, revision=None):
         self.info('Deploying {1} environment for {0}'.format(application, environment))
         url = '/me/applications/{0}/environments/{1}/revision'.format(application, environment)
         try:
-            self.client.put(url, {'revision': None, 'clean': clean})
+            self.client.put(url, {'revision': revision, 'clean': clean})
         except RESTAPIError:
             if create:
                 # FIXME this should no

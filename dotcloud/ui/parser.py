@@ -56,6 +56,10 @@ def get_parser(name='dotcloud'):
     push = subcmd.add_parser('push', help='Push the code')
     push.add_argument('--clean', action='store_true', help='clean build')
 
+    deploy = subcmd.add_parser('deploy', help='Deploy the code')
+    deploy.add_argument('revision', help='Revision to deploy', default='latest', nargs='?')
+    deploy.add_argument('--clean', action='store_true', help='clean build')
+
     var = subcmd.add_parser('var', help='Manipulate application variables') \
         .add_subparsers(dest='subcmd')
     var_list = var.add_parser('list', help='List the application variables')
@@ -81,6 +85,10 @@ def get_parser(name='dotcloud'):
     alias_rm = alias.add_parser('rm', help='Remove an alias')
     alias_rm.add_argument('service', help='Service to remove alias from')
     alias_rm.add_argument('alias', help='Alias (domain name) to remove')
+
+    service = subcmd.add_parser('service', help='Manage services') \
+        .add_subparsers(dest='subcmd')
+    service_list = service.add_parser('list', help='List the services')
 
     return parser
     
