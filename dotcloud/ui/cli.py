@@ -420,7 +420,8 @@ class CLI(object):
         for service in res.items:
             print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
             self.dump_service(service['instances'][0], indent=2)
-            revision = service['instances'][0]['revision']
+            if not revision:
+                revision = service['instances'][0]['revision']
         url = '/me/applications/{0}'.format(args.application)
         res = self.client.get(url)
         snapshots = res.item.get('snapshots_enabled', False)
