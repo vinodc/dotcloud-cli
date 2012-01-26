@@ -535,14 +535,25 @@ class CLI(object):
 
     @app_local
     def cmd_ssh(self, args):
-        # TODO support www.1
-        url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
+        instance = 0
+        if '.' in args.service:
+            svc, instance = args.service.split('.', 2)
+        else:
+            svc = args.service
+        try:
+            instance = int(instance)
+        except ValueError:
+            self.die('Usage: {0} ssh service[.N]'.format(self.cmd))
+        url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, svc)
         res = self.client.get(url)
         for service in res.items:
-            ports = service['instances'][0].get('ports', [])
-            u = [p for p in ports if p['name'] == 'ssh']
-            if len(u) > 0:
-                self.run_ssh(u[0]['url'], '$SHELL').wait()
+            try:
+                ports = service['instances'][instance].get('ports', [])
+                u = [p for p in ports if p['name'] == 'ssh']
+                if len(u) > 0:
+                    self.run_ssh(u[instance]['url'], '$SHELL').wait()
+            except IndexError:
+                self.die('Not Found: Service instance {0}.{1} does not exist'.format(svc, instance))
 
     @app_local
     def cmd_run(self, args):
