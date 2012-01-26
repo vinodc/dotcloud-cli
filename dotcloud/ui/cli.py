@@ -523,7 +523,7 @@ class CLI(object):
                     time.strftime('%H:%M:%S', time.gmtime(item['timestamp'])),
                     source,
                     item['message'])
-                print line
+                print line.encode('utf-8')
             next = res.find_link('next')
             if not next:
                 break
