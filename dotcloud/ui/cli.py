@@ -6,6 +6,7 @@ from ..client.errors import RESTAPIError, AuthenticationNotConfigured
 from ..client.auth import BasicAuth, NullAuth, OAuth2Auth
 
 import sys
+import codecs
 import os
 import json
 import subprocess
@@ -20,6 +21,7 @@ import base64
 class CLI(object):
     __version__ = VERSION
     def __init__(self, debug=False, endpoint=None):
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
         self.client = RESTClient(endpoint=endpoint, debug=debug)
         self.debug = debug
         self.error_handlers = {
@@ -523,7 +525,7 @@ class CLI(object):
                     time.strftime('%H:%M:%S', time.gmtime(item['timestamp'])),
                     source,
                     item['message'])
-                print line.encode('utf-8')
+                print line
             next = res.find_link('next')
             if not next:
                 break
