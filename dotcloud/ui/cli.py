@@ -239,7 +239,7 @@ class CLI(object):
         self.info('Creating a new application called "{0}"'.format(args.application))
         url = '/me/applications'
         try:
-            res = self.client.post(url, { 'name': args.application })
+            res = self.client.post(url, { 'name': args.application, 'repository': args.repo })
         except RESTAPIError as e:
             if e.code == 409:
                 self.die('Application "{0}" already exists.'.format(args.application))
