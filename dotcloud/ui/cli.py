@@ -7,6 +7,7 @@ from ..client.errors import (RESTAPIError, AuthenticationNotConfigured,
 from ..client.auth import BasicAuth, NullAuth, OAuth2Auth
 
 import sys
+import codecs
 import os
 import json
 import subprocess
@@ -21,6 +22,7 @@ import base64
 class CLI(object):
     __version__ = VERSION
     def __init__(self, debug=False, endpoint=None):
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
         self.client = RESTClient(endpoint=endpoint, debug=debug)
         self.debug = debug
         self.error_handlers = {
@@ -240,7 +242,7 @@ class CLI(object):
         self.info('Creating a new application called "{0}"'.format(args.application))
         url = '/me/applications'
         try:
-            res = self.client.post(url, { 'name': args.application })
+            res = self.client.post(url, { 'name': args.application, 'repository': args.repo })
         except RESTAPIError as e:
             if e.code == 409:
                 self.die('Application "{0}" already exists.'.format(args.application))
@@ -419,17 +421,23 @@ class CLI(object):
                 return
             else:
                 raise
-        revision = None
         for service in res.items:
             print '{0} (instances: {1})'.format(service['name'], len(service['instances']))
             self.dump_service(service['instances'][0], indent=2)
-            if not revision:
-                revision = service['instances'][0]['revision']
+
         url = '/me/applications/{0}'.format(args.application)
         res = self.client.get(url)
         snapshots = res.item.get('snapshots_enabled', False)
+        repo = res.item.get('repository')
+
+        url = '/me/applications/{0}/environments/{1}'.format(args.application, args.environment)
+        res = self.client.get(url)
+        revision = res.item.get('revision', None)
+
         print '--------'
-        print 'Revision: ' + revision
+        if repo:
+            print 'Repsotiroy: ' + repo
+        print 'Revision: ' + (revision if revision else '(Unknown)')
         print 'Build snapshots: ' + ('enabled' if snapshots else 'disabled')
 
     def dump_service(self, instance, indent=0):
@@ -535,14 +543,25 @@ class CLI(object):
 
     @app_local
     def cmd_ssh(self, args):
-        # TODO support www.1
-        url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, args.service)
+        instance = 0
+        if '.' in args.service:
+            svc, instance = args.service.split('.', 2)
+        else:
+            svc = args.service
+        try:
+            instance = int(instance)
+        except ValueError:
+            self.die('Usage: {0} ssh service[.N]'.format(self.cmd))
+        url = '/me/applications/{0}/environments/{1}/services/{2}'.format(args.application, args.environment, svc)
         res = self.client.get(url)
         for service in res.items:
-            ports = service['instances'][0].get('ports', [])
-            u = [p for p in ports if p['name'] == 'ssh']
-            if len(u) > 0:
-                self.run_ssh(u[0]['url'], '$SHELL').wait()
+            try:
+                ports = service['instances'][instance].get('ports', [])
+                u = [p for p in ports if p['name'] == 'ssh']
+                if len(u) > 0:
+                    self.run_ssh(u[instance]['url'], '$SHELL').wait()
+            except IndexError:
+                self.die('Not Found: Service instance {0}.{1} does not exist'.format(svc, instance))
 
     @app_local
     def cmd_run(self, args):

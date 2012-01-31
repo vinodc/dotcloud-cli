@@ -18,6 +18,7 @@ def get_parser(name='dotcloud'):
 
     create = subcmd.add_parser('create', help='Create a new application')
     create.add_argument('application', help='specify the application')
+    create.add_argument('--repo')
 
     conn = subcmd.add_parser('connect', help='Connect a local directory with an existing app')
     conn.add_argument('application', help='specify the application')
